@@ -5,16 +5,21 @@ let tex_fg;
 let tex_bg;
 
 let collumnArr = [];
-let collumnCount = 40;
+let collumnCount;
 
 let textArr = [];
 let slices = [];
 
 let isSorted = false;
 let sliceIndex = 0;
+//for the scroll wheel
 let pos = 0;
 
 function setup() {
+
+  var raw = getURLParams();
+  var params = split(raw.params, ',');
+  collumnCount = params[1];
 
   createCanvas(windowWidth, windowHeight, WEBGL);
   tex_bg = loadImage('assets/grass.jpg');
@@ -23,20 +28,19 @@ function setup() {
   //Initialize the collumn objects
 
   for (let i = 0; i < collumnCount; i++) {
-    collumnArr.push(new Collumn(i));
+    let x = ((width / collumnCount) * i);
+    collumnArr.push(new Collumn(i, x));
+    collumnArr[i].update();
   }
 
-
-  //Initialize the textArr
-  /*
-   * MANUALLY ADDING VALUES FOR HOMEWORK PROBLEM 2.1-1
-   */
 
   for (let i = 0; i < collumnCount; i++) {
-    textArr[i] = ceil(random(collumnCount/2));
+    textArr[i] = ceil(random(collumnCount / 2));
   }
 
   /*
+   * MANUALLY ADDING VALUES FOR HOMEWORK PROBLEM 2.1-1
+   
   textArr[0] = 31;
   textArr[1] = 41;
   textArr[2] = 59;
@@ -44,13 +48,15 @@ function setup() {
   textArr[4] = 41;
   textArr[5] = 58;
   */
-  insertionSortDescending(textArr);
+
+  if (params[0] == "ascending") {
+    insertionSortAscending(textArr);
+  } else if (params[0] == "descending") {
+    insertionSortDescending(textArr);
+  }
+
   isSorted = true;
 
-}
-
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
 }
 
 function draw() {
@@ -61,13 +67,14 @@ function draw() {
 
 
   background(51);
-  translate(0, 0, -pos);
+
   orbitControl();
+  translate(-width / 2 + collumnArr[0].width / 2, 0, -pos);
 
   if (focused) {
-    directionalLight(255, 200, 200, Math.cos(frameCount * 0.01), Math.sin(frameCount * 0.01), 1);
-    directionalLight(200, 255, 200, Math.sin(frameCount * 0.01), Math.cos(frameCount * 0.01), 1);
-    //directionalLight(0, 0, 255, Math.cos(frameCount * 0.03), Math.sin(frameCount * 0.03), 0.5);
+    ambientLight(255, 0, 0);
+    directionalLight(255, 0, 255, Math.cos(frameCount * 0.01), Math.sin(frameCount * 0.01), 1);
+    directionalLight(255, 255, 0, Math.sin(frameCount * 0.01), Math.cos(frameCount * 0.01), 1);
   }
 
   if (isSorted) {
@@ -80,15 +87,40 @@ function draw() {
 
     //THIS LOOP UPDATES THE COLLUMN VALUE
     for (let i = 0; i < collumnCount; i++) {
-
-      collumnArr[i].update();
       collumnArr[i].getValue(slices[sliceIndex][i]);
       collumnArr[i].show();
 
     }
 
   }
+
+  //swapX(collumnArr[0], collumnArr[2]);
+
 }
+
+function swapX(a, b) {
+
+  let temp = 0;
+
+  if (a.x < b.x) {
+    let xDist = dist(a, b);
+
+    a.dx = xDist * Math.cos(xDist);
+    b.dx = xDist * Math.cos(xDist);
+    a.dz--;
+    b.dz++;
+
+  }
+}
+
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  for (let i = 0; i < collumnCount; i++) {
+    collumnArr[i].update();
+  }
+}
+
 
 function keyPressed() {
 
