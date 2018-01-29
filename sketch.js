@@ -5,7 +5,7 @@ let tex_fg;
 let tex_bg;
 
 let collumnArr = [];
-let collumnCount = 100;
+let collumnCount = 40;
 
 let textArr = [];
 let slices = [];
@@ -16,7 +16,7 @@ let pos = 0;
 
 function setup() {
 
-  createCanvas(windowHeight, windowHeight, WEBGL);
+  createCanvas(windowWidth, windowHeight, WEBGL);
   tex_bg = loadImage('assets/grass.jpg');
   tex_fg = loadImage('assets/black.jpg');
 
@@ -33,7 +33,7 @@ function setup() {
    */
 
   for (let i = 0; i < collumnCount; i++) {
-    textArr[i] = ceil(random(collumnCount));
+    textArr[i] = ceil(random(collumnCount/2));
   }
 
   /*
@@ -61,13 +61,13 @@ function draw() {
 
 
   background(51);
-  translate(0, pos / 1.8, -pos);
+  translate(0, 0, -pos);
   orbitControl();
 
   if (focused) {
-    directionalLight(255, 0, 0, Math.cos(frameCount * 0.01), Math.sin(frameCount * 0.01), 0.5);
-    directionalLight(0, 255, 0, Math.cos(frameCount * 0.02), Math.sin(frameCount * 0.02), 0.5);
-    directionalLight(0, 0, 255, Math.cos(frameCount * 0.03), Math.sin(frameCount * 0.03), 0.5);
+    directionalLight(255, 200, 200, Math.cos(frameCount * 0.01), Math.sin(frameCount * 0.01), 1);
+    directionalLight(200, 255, 200, Math.sin(frameCount * 0.01), Math.cos(frameCount * 0.01), 1);
+    //directionalLight(0, 0, 255, Math.cos(frameCount * 0.03), Math.sin(frameCount * 0.03), 0.5);
   }
 
   if (isSorted) {
