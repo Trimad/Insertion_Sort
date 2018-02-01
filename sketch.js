@@ -19,36 +19,29 @@ function setup() {
 
   var raw = getURLParams();
   var params = split(raw.params, ',');
-  collumnCount = params[1];
+  if (params[1]) {
+    collumnCount = params[1];
+  } else {
+    collumnCount = 32;
+  }
 
   createCanvas(windowWidth, windowHeight, WEBGL);
-  tex_bg = loadImage('assets/grass.jpg');
-  tex_fg = loadImage('assets/black.jpg');
+  //tex_bg = loadImage('assets/grass.jpg');
+  //tex_fg = loadImage('assets/black.jpg');
 
   //Initialize the collumn objects
-
   for (let i = 0; i < collumnCount; i++) {
     let x = ((width / collumnCount) * i);
     collumnArr.push(new Collumn(i, x));
     collumnArr[i].update();
   }
 
+//Populate an array of random integers
 
-  for (let i = 0; i < collumnCount; i++) {
-    textArr[i] = ceil(random(collumnCount / 2));
-  }
-
-  /*
-   * MANUALLY ADDING VALUES FOR HOMEWORK PROBLEM 2.1-1
+    for (let i = 0; i < collumnCount; i++) {
+      textArr[i] = ceil(random(collumnCount / 2));
+    }
    
-  textArr[0] = 31;
-  textArr[1] = 41;
-  textArr[2] = 59;
-  textArr[3] = 26;
-  textArr[4] = 41;
-  textArr[5] = 58;
-  */
-
   if (params[0] == "ascending") {
     insertionSortAscending(textArr);
   } else if (params[0] == "descending") {
@@ -64,7 +57,6 @@ function draw() {
   if (frameCount % 30 == 0) {
     document.title = floor(frameRate()) + " FPS";
   }
-
 
   background(51);
 
@@ -89,30 +81,64 @@ function draw() {
     for (let i = 0; i < collumnCount; i++) {
       collumnArr[i].getValue(slices[sliceIndex][i]);
       collumnArr[i].show();
-
     }
 
   }
 
-  //swapX(collumnArr[0], collumnArr[2]);
-
+  /*
+    if (frameCount % 60 == 0) {
+      isSorting = true;
+    }
+    swapX(collumnArr[0], collumnArr[1]);
+    swapX(collumnArr[2], collumnArr[3]);
+  */
 }
 
+
+let tempD = 0;
+let isSorting = false;
+
+/*
+*
+* swapX(var,var) is a broken function; still in progress
+*
+*/
 function swapX(a, b) {
+  //a.visible = false;
+  //b.visible = false;
+  //Update the first column
+  let d = (a.x - b.x) / 2;
+  let dx = d * Math.cos(frameCount * 0.1);
+  let dz = d * Math.sin(frameCount * 0.1);
 
-  let temp = 0;
+  //Show the first column
+  for (let i = 0; i < a.value; i++) {
+    let y = -(height / 2) + i * a.width + a.width - (a.width / 2);
+    translate((a.width / 2 + dx), -y, dz);
+    rotateY(frameCount * 0.05);
+    specularMaterial(255);
+    sphere(a.size, 16, 16);
+    rotateY(-frameCount * 0.05);
+    translate(-(a.width / 2 + dx), y, -dz);
+  }
 
-  if (a.x < b.x) {
-    let xDist = dist(a, b);
+  //Show the second column
+  for (let i = 0; i < b.value; i++) {
+    let y = -(height / 2) + i * b.width + b.width - (b.width / 2);
+    translate((b.width / 2 - dx), -y, -dz);
+    rotateY(frameCount * 0.05);
+    specularMaterial(255);
+    sphere(a.size, 16, 16);
+    rotateY(-frameCount * 0.05);
+    translate(-(b.width / 2 - dx), y, dz);
+  }
 
-    a.dx = xDist * Math.cos(xDist);
-    b.dx = xDist * Math.cos(xDist);
-    a.dz--;
-    b.dz++;
-
+  if (dz === 0) {
+    isSorting = true;
+    a.visible = true;
+    b.visible = false;
   }
 }
-
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
@@ -120,7 +146,6 @@ function windowResized() {
     collumnArr[i].update();
   }
 }
-
 
 function keyPressed() {
 
@@ -136,19 +161,16 @@ function keyPressed() {
 }
 
 function mouseWheel(event) {
-  //move the square according to the vertical scroll amount
   pos += event.delta;
-  //uncomment to block page scrolling
-  //return false;
 }
 
 function insertionSortAscending(A) {
+  addSlice(A, slices);
   for (let j = 1; j < A.length; j++) {
     let _key = A[j];
     //Insert A[j] into the sorted sequence A[1..j-1].
     let i = j - 1;
     while (A[i] > _key) {
-      //addSlice(A, slices);
       A[i + 1] = A[i];
       i = i - 1;
       A[i + 1] = _key;
@@ -158,12 +180,12 @@ function insertionSortAscending(A) {
 }
 
 function insertionSortDescending(A) {
+  addSlice(A, slices);
   for (let j = 1; j < A.length; j++) {
     let _key = A[j];
     //Insert A[j] into the sorted sequence A[1..j-1].
     let i = j - 1;
     while (A[i] < _key) {
-      //addSlice(A, slices);
       A[i + 1] = A[i];
       i = i - 1;
       A[i + 1] = _key;
